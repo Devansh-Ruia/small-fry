@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Pre-commit hook: run the GUT test suite if it exists.
+#
+# Covers the game logic worth testing (vision-cone detection, checkpoint reset).
+# Skips silently when GUT or the Godot engine is not present, so it never gets in
+# the way early in the jam. On test failure it blocks the commit; bypass with:
+#   git commit --no-verify
+#
+# Activate once per clone:
+#   git config core.hooksPath .githooks
+
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
+# Locate a test directory.
+test_dir=""
+for d in test tests; do
+  if [ -d "$d" ]; then
+    test_dir="$d"
+    break
+  fi
+done
+
+# Skip if GUT addon or tests are absent.
+if [ ! -d "addons/gut" ] || [ -z "$test_dir" ]; then
+  exit 0
+fi
+
+# Locate the Godot binary: $GODOT env var, else `godot` on PATH.
+godot_bin="${GODOT:-godot}"
+if ! command -v "$godot_bin" >/dev/null 2>&1; then
+  echo "pre-commit: GUT tests present but Godot binary not found (set \$GODOT or add 'godot' to PATH). Skipping." >&2
+  exit 0
+fi
+
+echo "pre-commit: running GUT suite in $test_dir/ ..."
+"$godot_bin" --headless -s addons/gut/gut_cmdln.gd -gdir="res://$test_dir" -gexit
