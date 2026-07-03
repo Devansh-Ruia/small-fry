@@ -35,32 +35,32 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
 use_collision = true
 size = Vector3(14, 0.5, 14)
 
-[node name="WallNorth" type="CSGBox3D" parent="."]
+[node name="WallNorth" type="CSGBox3D" parent="." groups=["occluder"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 7)
 use_collision = true
 size = Vector3(14, 4, 0.5)
 
-[node name="WallSouth" type="CSGBox3D" parent="."]
+[node name="WallSouth" type="CSGBox3D" parent="." groups=["occluder"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -7)
 use_collision = true
 size = Vector3(14, 4, 0.5)
 
-[node name="WallEast" type="CSGBox3D" parent="."]
+[node name="WallEast" type="CSGBox3D" parent="." groups=["occluder"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 2, 0)
 use_collision = true
 size = Vector3(0.5, 4, 14)
 
-[node name="WallWest" type="CSGBox3D" parent="."]
+[node name="WallWest" type="CSGBox3D" parent="." groups=["occluder"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 2, 0)
 use_collision = true
 size = Vector3(0.5, 4, 14)
 
-[node name="DivideLeft" type="CSGBox3D" parent="."]
+[node name="DivideLeft" type="CSGBox3D" parent="." groups=["occluder"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.6, 2, 0)
 use_collision = true
 size = Vector3(6.8, 4, 0.5)
 
-[node name="DivideRight" type="CSGBox3D" parent="."]
+[node name="DivideRight" type="CSGBox3D" parent="." groups=["occluder"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.6, 2, 0)
 use_collision = true
 size = Vector3(6.8, 4, 0.5)
@@ -71,17 +71,17 @@ use_collision = true
 size = Vector3(1, 1, 1)
 material = SubResource("MatRed")
 
-[node name="FurnitureA" type="CSGBox3D" parent="."]
+[node name="FurnitureA" type="CSGBox3D" parent="." groups=["occluder"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 1.5, -4.5)
 use_collision = true
 size = Vector3(3, 3, 3)
 
-[node name="FurnitureB" type="CSGBox3D" parent="."]
+[node name="FurnitureB" type="CSGBox3D" parent="." groups=["occluder"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 2, 4)
 use_collision = true
 size = Vector3(3.5, 4, 3)
 
-[node name="FurnitureC" type="CSGBox3D" parent="."]
+[node name="FurnitureC" type="CSGBox3D" parent="." groups=["occluder"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 2.5, 4.5)
 use_collision = true
 size = Vector3(3, 5, 3)

@@ -18,21 +18,38 @@ extends CharacterBody3D
 @export var jump_velocity: float = 2.0
 
 @export_group("Camera")
-## Distance from the player along the camera's line to the ground.
+## Spring-arm length: how far the camera sits from the player when unobstructed.
 @export var camera_distance: float = 4.0
-## Pitch of the camera in degrees. Negative looks down at the player.
+## Pitch of the arm in degrees. Negative looks down at the player.
 @export var camera_angle_deg: float = -55.0
-## How quickly the camera eases toward the player. Higher is stiffer.
+## How quickly the arm eases toward the player. Higher is stiffer.
 @export var camera_follow_smoothing: float = 8.0
 
+@export_group("Occluder fade")
+## Alpha a wall or furniture mesh fades to while it blocks the view.
+@export var occluder_alpha: float = 0.3
+## How fast meshes fade in/out. Higher is snappier; keep it smooth, not a pop.
+@export var occluder_fade_speed: float = 6.0
+
+## Height above the body origin used as the camera anchor and ray target.
+const ANCHOR_HEIGHT: float = 0.15
+## Safety cap on the occluder ray loop.
+const MAX_OCCLUDER_STEPS: int = 8
+
 @onready var _mesh: Node3D = $Mesh
-@onready var _camera: Camera3D = $Camera3D
+@onready var _spring_arm: SpringArm3D = $SpringArm3D
+@onready var _camera: Camera3D = $SpringArm3D/Camera3D
+
+# Meshes currently faded, mapped to their fade material and live alpha.
+var _fading: Dictionary = {}
 
 func _ready() -> void:
-	# The camera lives in world space so it trails the player smoothly instead of
-	# being rigidly welded to the body.
-	_camera.top_level = true
-	_snap_camera()
+	# The arm lives in world space so it trails the player smoothly rather than
+	# being rigidly welded to the body, and ignores the player it is anchored in.
+	_spring_arm.top_level = true
+	_spring_arm.add_excluded_object(get_rid())
+	_spring_arm.global_position = _camera_anchor()
+	_update_spring_arm(1.0)
 
 func _physics_process(delta: float) -> void:
 	_apply_gravity(delta)
@@ -40,7 +57,8 @@ func _physics_process(delta: float) -> void:
 	_handle_move(delta)
 	move_and_slide()
 	_face_move_direction(delta)
-	_follow_with_camera(delta)
+	_update_spring_arm(delta)
+	_update_occluder_fade(delta)
 
 func _apply_gravity(delta: float) -> void:
 	if not is_on_floor():
@@ -76,19 +94,59 @@ func _face_move_direction(delta: float) -> void:
 		var target_yaw: float = atan2(horizontal.x, horizontal.z)
 		_mesh.rotation.y = lerp_angle(_mesh.rotation.y, target_yaw, 12.0 * delta)
 
-func _camera_offset() -> Vector3:
-	# Convert distance + pitch into a fixed offset behind and above the player.
-	var pitch: float = deg_to_rad(camera_angle_deg)
-	var back: float = camera_distance * cos(pitch)
-	var up: float = -camera_distance * sin(pitch)
-	return Vector3(0.0, up, back)
+func _camera_anchor() -> Vector3:
+	return global_position + Vector3(0.0, ANCHOR_HEIGHT, 0.0)
 
-func _snap_camera() -> void:
-	_camera.global_position = global_position + _camera_offset()
-	_camera.look_at(global_position, Vector3.UP)
-
-func _follow_with_camera(delta: float) -> void:
-	var target: Vector3 = global_position + _camera_offset()
+func _update_spring_arm(delta: float) -> void:
+	# Ease the arm toward the player; the SpringArm handles collision shortening
+	# so the camera never clips through or leaves the room.
 	var weight: float = clamp(camera_follow_smoothing * delta, 0.0, 1.0)
-	_camera.global_position = _camera.global_position.lerp(target, weight)
-	_camera.look_at(global_position, Vector3.UP)
+	_spring_arm.global_position = _spring_arm.global_position.lerp(_camera_anchor(), weight)
+	# Pitch only, no yaw: the framing stays fixed like the old offset camera.
+	_spring_arm.rotation = Vector3(deg_to_rad(camera_angle_deg), 0.0, 0.0)
+	_spring_arm.spring_length = camera_distance
+
+func _update_occluder_fade(delta: float) -> void:
+	# Walk the ray from the camera to the player, collecting every occluder mesh
+	# in between so more than one can fade at once.
+	var occluding: Dictionary = {}
+	var space := get_world_3d().direct_space_state
+	var from: Vector3 = _camera.global_position
+	var to: Vector3 = _camera_anchor()
+	var exclude: Array[RID] = [get_rid()]
+	for _i in MAX_OCCLUDER_STEPS:
+		var query := PhysicsRayQueryParameters3D.create(from, to)
+		query.exclude = exclude
+		var hit: Dictionary = space.intersect_ray(query)
+		if hit.is_empty():
+			break
+		var node = hit.get("collider")
+		if node is Node and node.is_in_group("occluder"):
+			occluding[node] = true
+		exclude.append(hit.get("rid"))
+
+	# Start tracking any newly-occluding mesh, then move every tracked mesh
+	# toward its target alpha (occluders already tracked fade back to opaque).
+	for node in occluding:
+		if not _fading.has(node):
+			_fading[node] = _make_fade(node)
+	for node in _fading.keys():
+		if not is_instance_valid(node):
+			_fading.erase(node)
+			continue
+		var entry: Dictionary = _fading[node]
+		var target: float = occluder_alpha if occluding.has(node) else 1.0
+		entry.alpha = move_toward(entry.alpha, target, occluder_fade_speed * delta)
+		entry.material.albedo_color.a = entry.alpha
+		if entry.alpha >= 0.999 and not occluding.has(node):
+			# Fully restored: drop the override so the mesh renders as before.
+			node.material_override = null
+			_fading.erase(node)
+
+func _make_fade(node: GeometryInstance3D) -> Dictionary:
+	# Neutral albedo matches the default CSG greybox look; alpha starts opaque.
+	var mat := StandardMaterial3D.new()
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.albedo_color = Color(1.0, 1.0, 1.0, 1.0)
+	node.material_override = mat
+	return {"material": mat, "alpha": 1.0}
