@@ -18,38 +18,46 @@ extends CharacterBody3D
 @export var jump_velocity: float = 2.0
 
 @export_group("Camera")
-## Spring-arm length: how far the camera sits from the player when unobstructed.
+## How far the camera sits from the player when the view is unobstructed.
 @export var camera_distance: float = 4.0
-## Pitch of the arm in degrees. Negative looks down at the player.
+## Floor on the camera distance. It never pulls closer than this even against a
+## wall, so the player can always see enough room ahead to plan a route.
+@export var camera_min_distance: float = 2.0
+## Pitch of the camera in degrees. Negative looks down at the player.
 @export var camera_angle_deg: float = -55.0
-## How quickly the arm eases toward the player. Higher is stiffer.
+## How quickly the camera eases toward the player. Higher is stiffer.
 @export var camera_follow_smoothing: float = 8.0
 
 @export_group("Occluder fade")
 ## Alpha a wall or furniture mesh fades to while it blocks the view.
-@export var occluder_alpha: float = 0.3
+@export var occluder_alpha: float = 0.5
 ## How fast meshes fade in/out. Higher is snappier; keep it smooth, not a pop.
 @export var occluder_fade_speed: float = 6.0
 
 ## Height above the body origin used as the camera anchor and ray target.
 const ANCHOR_HEIGHT: float = 0.15
+## Gap kept between the camera and a wall it collides with.
+const COLLISION_MARGIN: float = 0.1
 ## Safety cap on the occluder ray loop.
 const MAX_OCCLUDER_STEPS: int = 8
 
 @onready var _mesh: Node3D = $Mesh
-@onready var _spring_arm: SpringArm3D = $SpringArm3D
-@onready var _camera: Camera3D = $SpringArm3D/Camera3D
+@onready var _camera: Camera3D = $Camera3D
 
+# Smoothed follow point the camera looks at and orbits.
+var _pivot: Vector3 = Vector3.ZERO
+# Smoothed camera distance, eased between the min and max so it never snaps.
+var _cam_distance: float = 0.0
 # Meshes currently faded, mapped to their fade material and live alpha.
 var _fading: Dictionary = {}
 
 func _ready() -> void:
-	# The arm lives in world space so it trails the player smoothly rather than
-	# being rigidly welded to the body, and ignores the player it is anchored in.
-	_spring_arm.top_level = true
-	_spring_arm.add_excluded_object(get_rid())
-	_spring_arm.global_position = _camera_anchor()
-	_update_spring_arm(1.0)
+	# The camera lives in world space so it trails the player smoothly rather
+	# than being rigidly welded to the body.
+	_camera.top_level = true
+	_pivot = _camera_anchor()
+	_cam_distance = camera_distance
+	_place_camera()
 
 func _physics_process(delta: float) -> void:
 	_apply_gravity(delta)
@@ -57,7 +65,7 @@ func _physics_process(delta: float) -> void:
 	_handle_move(delta)
 	move_and_slide()
 	_face_move_direction(delta)
-	_update_spring_arm(delta)
+	_update_camera(delta)
 	_update_occluder_fade(delta)
 
 func _apply_gravity(delta: float) -> void:
@@ -97,14 +105,36 @@ func _face_move_direction(delta: float) -> void:
 func _camera_anchor() -> Vector3:
 	return global_position + Vector3(0.0, ANCHOR_HEIGHT, 0.0)
 
-func _update_spring_arm(delta: float) -> void:
-	# Ease the arm toward the player; the SpringArm handles collision shortening
-	# so the camera never clips through or leaves the room.
+func _camera_dir() -> Vector3:
+	# Fixed up-and-back offset from the pitch: no yaw, so framing stays constant.
+	var pitch: float = deg_to_rad(camera_angle_deg)
+	return Vector3(0.0, -sin(pitch), cos(pitch)).normalized()
+
+func _place_camera() -> void:
+	_camera.global_position = _pivot + _camera_dir() * _cam_distance
+	_camera.look_at(_pivot, Vector3.UP)
+
+func _update_camera(delta: float) -> void:
 	var weight: float = clamp(camera_follow_smoothing * delta, 0.0, 1.0)
-	_spring_arm.global_position = _spring_arm.global_position.lerp(_camera_anchor(), weight)
-	# Pitch only, no yaw: the framing stays fixed like the old offset camera.
-	_spring_arm.rotation = Vector3(deg_to_rad(camera_angle_deg), 0.0, 0.0)
-	_spring_arm.spring_length = camera_distance
+	_pivot = _pivot.lerp(_camera_anchor(), weight)
+
+	# Manual collision: cast toward the max-distance camera point and shorten to
+	# the hit, but never closer than the min so the room ahead stays visible.
+	var dir: Vector3 = _camera_dir()
+	var desired: float = camera_distance
+	var space := get_world_3d().direct_space_state
+	var query := PhysicsRayQueryParameters3D.create(_pivot, _pivot + dir * camera_distance)
+	query.exclude = [get_rid()]
+	var hit: Dictionary = space.intersect_ray(query)
+	if not hit.is_empty():
+		desired = _pivot.distance_to(hit.get("position")) - COLLISION_MARGIN
+
+	# Guard against a min set larger than the max in the inspector.
+	var effective_min: float = min(camera_min_distance, camera_distance)
+	var target: float = clamp(desired, effective_min, camera_distance)
+	# Ease the distance so it shortens and lengthens smoothly, never snapping.
+	_cam_distance = lerp(_cam_distance, target, weight)
+	_place_camera()
 
 func _update_occluder_fade(delta: float) -> void:
 	# Walk the ray from the camera to the player, collecting every occluder mesh
