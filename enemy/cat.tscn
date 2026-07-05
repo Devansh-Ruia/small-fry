@@ -1,0 +1,26 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://enemy/cat.gd" id="1_cat"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_cat"]
+radius = 0.3
+height = 0.6
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_cat"]
+radius = 0.3
+height = 0.6
+
+[sub_resource type="StandardMaterial3D" id="MatCat"]
+albedo_color = Color(0.85, 0.55, 0.2, 1)
+
+[node name="Cat" type="CharacterBody3D"]
+script = ExtResource("1_cat")
+
+[node name="Collision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+shape = SubResource("CapsuleShape3D_cat")
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+mesh = SubResource("CapsuleMesh_cat")
+material_override = SubResource("MatCat")

@@ -1,6 +1,7 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="PackedScene" path="res://player/player.tscn" id="1_player"]
+[ext_resource type="PackedScene" path="res://enemy/cat.tscn" id="2_cat"]
 
 [sub_resource type="ProceduralSkyMaterial" id="SkyMat"]
 
@@ -20,6 +21,13 @@ albedo_color = Color(0.2, 0.7, 0.3, 1)
 
 [sub_resource type="StandardMaterial3D" id="MatBlue"]
 albedo_color = Color(0.25, 0.45, 0.85, 1)
+
+[sub_resource type="Curve3D" id="CatPathCurve"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, -2, 0.3, 1, 0, 0, 0, 0, 0, 0, 2, 0.3, 1, 0, 0, 0, 0, 0, 0, 2, 0.3, 4.5, 0, 0, 0, 0, 0, 0, -2, 0.3, 4.5, 0, 0, 0, 0, 0, 0, -2, 0.3, 1),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0)
+}
+point_count = 5
 
 [node name="Room01" type="Node3D"]
 
@@ -98,3 +106,15 @@ material = SubResource("MatGreen")
 
 [node name="Player" parent="." instance=ExtResource("1_player")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, -5)
+
+[node name="RespawnPoint" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, -5)
+
+[node name="CatPath" type="Path3D" parent="."]
+curve = SubResource("CatPathCurve")
+
+[node name="Cat" parent="." instance=ExtResource("2_cat")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, 1)
+patrol_path = NodePath("../CatPath")
+target = NodePath("../Player")
+respawn_point = NodePath("../RespawnPoint")
