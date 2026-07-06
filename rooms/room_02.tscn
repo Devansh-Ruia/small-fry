@@ -1,0 +1,112 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="PackedScene" path="res://player/player.tscn" id="1_player"]
+[ext_resource type="PackedScene" path="res://enemy/cat.tscn" id="2_cat"]
+
+[sub_resource type="ProceduralSkyMaterial" id="SkyMat"]
+
+[sub_resource type="Sky" id="Sky"]
+sky_material = SubResource("SkyMat")
+
+[sub_resource type="Environment" id="Env"]
+background_mode = 2
+sky = SubResource("Sky")
+ambient_light_source = 3
+
+[sub_resource type="StandardMaterial3D" id="MatGreen"]
+albedo_color = Color(0.2, 0.7, 0.3, 1)
+
+[sub_resource type="StandardMaterial3D" id="MatBlue"]
+albedo_color = Color(0.25, 0.45, 0.85, 1)
+
+[sub_resource type="Curve3D" id="CatPathCurve"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, -0.5, 0.3, -9, 0, 0, 0, 0, 0, 0, 0.5, 0.3, -9, 0, 0, 0, 0, 0, 0, 0.5, 0.3, 9, 0, 0, 0, 0, 0, 0, -0.5, 0.3, 9, 0, 0, 0, 0, 0, 0, -0.5, 0.3, -9),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0)
+}
+point_count = 5
+
+[node name="Room02" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.5, -0.866, 0, 0.866, 0.5, 0, 6, 0)
+shadow_enabled = true
+
+[node name="Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
+use_collision = true
+size = Vector3(8, 0.5, 26)
+
+[node name="WallSouth" type="CSGBox3D" parent="." groups=["occluder"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -13)
+use_collision = true
+size = Vector3(8, 4, 0.5)
+
+[node name="WallNorth" type="CSGBox3D" parent="." groups=["occluder"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 13)
+use_collision = true
+size = Vector3(8, 4, 0.5)
+
+[node name="WallWest" type="CSGBox3D" parent="." groups=["occluder"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2, 0)
+use_collision = true
+size = Vector3(0.5, 4, 26)
+
+[node name="WallEastSouth" type="CSGBox3D" parent="." groups=["occluder"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 2, -6.6)
+use_collision = true
+size = Vector3(0.5, 4, 12.8)
+
+[node name="WallEastMid" type="CSGBox3D" parent="." groups=["occluder"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 2, 4.6)
+use_collision = true
+size = Vector3(0.5, 4, 8.8)
+
+[node name="PocketFloor" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, -0.25, 6)
+use_collision = true
+size = Vector3(2, 0.5, 14)
+
+[node name="PocketWallEast" type="CSGBox3D" parent="." groups=["occluder"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 2, 6)
+use_collision = true
+size = Vector3(0.5, 4, 14)
+
+[node name="FurnitureA" type="CSGBox3D" parent="." groups=["occluder"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 1.5, -3)
+use_collision = true
+size = Vector3(3, 3, 3)
+
+[node name="FurnitureB" type="CSGBox3D" parent="." groups=["occluder"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 2, 6)
+use_collision = true
+size = Vector3(3, 4, 3)
+
+[node name="StartPad" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, -11)
+size = Vector3(1.5, 0.1, 1.5)
+material = SubResource("MatBlue")
+
+[node name="ExitPad" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 11.5)
+size = Vector3(1.5, 0.1, 1.5)
+material = SubResource("MatGreen")
+
+[node name="Player" parent="." instance=ExtResource("1_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, -11)
+
+[node name="RespawnPoint" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, -11)
+
+[node name="CatPath" type="Path3D" parent="."]
+curve = SubResource("CatPathCurve")
+
+[node name="Cat" parent="." instance=ExtResource("2_cat")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0, -9)
+patrol_speed = 2.0
+patrol_path = NodePath("../CatPath")
+target = NodePath("../Player")
+respawn_point = NodePath("../RespawnPoint")
