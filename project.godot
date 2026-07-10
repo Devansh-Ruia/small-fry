@@ -51,6 +51,10 @@ jump={
 ]
 }
 
+[autoload]
+
+AudioManager="*res://soundtrack/audio_manager.gd"
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"

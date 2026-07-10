@@ -80,6 +80,9 @@ albedo_color = Color(0.25, 0.45, 0.85, 1)
 [sub_resource type="StandardMaterial3D" id="MatGreen"]
 albedo_color = Color(0.2, 0.7, 0.3, 1)
 
+[sub_resource type="BoxShape3D" id="SqueezeBox"]
+size = Vector3(1.7, 0.4, 0.6)
+
 [sub_resource type="Curve3D" id="CatPathCurve"]
 _data = {
 "points": PackedVector3Array(0, 0, 0, 0, 0, 0, -2, 0.3, 1, 0, 0, 0, 0, 0, 0, 2, 0.3, 1, 0, 0, 0, 0, 0, 0, 2, 0.3, 4.5, 0, 0, 0, 0, 0, 0, -2, 0.3, 4.5, 0, 0, 0, 0, 0, 0, -2, 0.3, 1),
@@ -385,3 +388,11 @@ transform = Transform3D(-0.7239593, 0, 0.68984264, 0, 1, 0, -0.68984264, 0, -0.7
 
 [node name="conveyor-bars-fence4" parent="." unique_id=1401418582 instance=ExtResource("7_6peq8")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0.008761823, 0.86652005, 0.7756643)
+
+[node name="SqueezeArea" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.03, 0.2, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SqueezeArea"]
+shape = SubResource("SqueezeBox")
+
+[connection signal="body_entered" from="SqueezeArea" to="Player" method="_on_squeeze_entered"]

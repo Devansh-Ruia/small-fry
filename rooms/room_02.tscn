@@ -1,7 +1,10 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="PackedScene" path="res://player/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" path="res://enemy/cat.tscn" id="2_cat"]
+
+[sub_resource type="BoxShape3D" id="SqueezeBox"]
+size = Vector3(0.6, 0.4, 0.4)
 
 [sub_resource type="ProceduralSkyMaterial" id="SkyMat"]
 
@@ -110,3 +113,11 @@ patrol_speed = 2.0
 patrol_path = NodePath("../CatPath")
 target = NodePath("../Player")
 respawn_point = NodePath("../RespawnPoint")
+
+[node name="SqueezeArea" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.3, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SqueezeArea"]
+shape = SubResource("SqueezeBox")
+
+[connection signal="body_entered" from="SqueezeArea" to="Player" method="_on_squeeze_entered"]

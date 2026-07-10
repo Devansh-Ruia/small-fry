@@ -1,6 +1,7 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://player/player.gd" id="1_player"]
+[ext_resource type="AudioStream" path="res://soundtrack/tiny_foot.mp3" id="2_foot"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
 radius = 0.12
@@ -22,3 +23,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, 0)
 mesh = SubResource("CapsuleMesh_body")
 
 [node name="Camera3D" type="Camera3D" parent="."]
+
+[node name="Footstep" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("2_foot")
+bus = &"SFX"
+
+[node name="StepTimer" type="Timer" parent="."]
+wait_time = 0.4

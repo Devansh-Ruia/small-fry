@@ -34,6 +34,14 @@ extends CharacterBody3D
 ## How fast meshes fade in/out. Higher is snappier; keep it smooth, not a pop.
 @export var occluder_fade_speed: float = 6.0
 
+@export_group("Footsteps")
+## Volume of the footstep one-shot, in decibels.
+@export var footstep_volume_db: float = 0.0
+## Seconds between footsteps while moving on the ground.
+@export var footstep_interval: float = 0.4
+## Horizontal speed below which the player counts as standing still.
+@export var footstep_min_speed: float = 0.3
+
 ## Height above the body origin used as the camera anchor and ray target.
 const ANCHOR_HEIGHT: float = 0.15
 ## Gap kept between the camera and a wall it collides with.
@@ -43,6 +51,8 @@ const MAX_OCCLUDER_STEPS: int = 8
 
 @onready var _mesh: Node3D = $Mesh
 @onready var _camera: Camera3D = $Camera3D
+@onready var _footstep: AudioStreamPlayer = $Footstep
+@onready var _step_timer: Timer = $StepTimer
 
 # Smoothed follow point the camera looks at and orbits.
 var _pivot: Vector3 = Vector3.ZERO
@@ -59,6 +69,10 @@ func _ready() -> void:
 	_cam_distance = camera_distance
 	_place_camera()
 
+	_footstep.volume_db = footstep_volume_db
+	_step_timer.wait_time = footstep_interval
+	_step_timer.timeout.connect(_on_step_timer_timeout)
+
 func _physics_process(delta: float) -> void:
 	_apply_gravity(delta)
 	_handle_jump()
@@ -67,6 +81,26 @@ func _physics_process(delta: float) -> void:
 	_face_move_direction(delta)
 	_update_camera(delta)
 	_update_occluder_fade(delta)
+	_update_footsteps()
+
+func _update_footsteps() -> void:
+	# Footstep cadence: a single step clip retriggered on a timer while the player
+	# moves on the ground. Stops the moment they stand still or leave the floor.
+	var speed: float = Vector2(velocity.x, velocity.z).length()
+	if is_on_floor() and speed > footstep_min_speed:
+		if _step_timer.is_stopped():
+			_footstep.play()
+			_step_timer.start(footstep_interval)
+	else:
+		_step_timer.stop()
+
+func _on_step_timer_timeout() -> void:
+	_footstep.play()
+
+func _on_squeeze_entered(body: Node3D) -> void:
+	# Fired by a room's squeeze Area3D. Only react to this player entering it.
+	if body == self:
+		AudioManager.play_sfx("tiny_sqz")
 
 func _apply_gravity(delta: float) -> void:
 	if not is_on_floor():

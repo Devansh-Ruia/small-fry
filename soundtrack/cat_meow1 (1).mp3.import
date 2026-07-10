@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://qwc5kwed4rgo"
+path="res://.godot/imported/cat_meow1 (1).mp3-894e3c6f5a3fe8002cb668ac77e82e14.mp3str"
+
+[deps]
+
+source_file="res://soundtrack/cat_meow1 (1).mp3"
+dest_files=["res://.godot/imported/cat_meow1 (1).mp3-894e3c6f5a3fe8002cb668ac77e82e14.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

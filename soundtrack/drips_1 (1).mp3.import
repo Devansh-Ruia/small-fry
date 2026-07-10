@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://dpcjvdejluu2s"
+path="res://.godot/imported/drips_1 (1).mp3-d546b6429c8eada880103e86edfe4e81.mp3str"
+
+[deps]
+
+source_file="res://soundtrack/drips_1 (1).mp3"
+dest_files=["res://.godot/imported/drips_1 (1).mp3-d546b6429c8eada880103e86edfe4e81.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

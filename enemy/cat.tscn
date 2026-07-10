@@ -1,6 +1,9 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://enemy/cat.gd" id="1_cat"]
+[ext_resource type="AudioStream" path="res://soundtrack/tiny_catbell.mp3" id="2_bell"]
+[ext_resource type="AudioStream" path="res://soundtrack/meow2.mp3" id="3_meow"]
+[ext_resource type="AudioStream" path="res://soundtrack/cat_meow1.mp3" id="4_caught"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_cat"]
 radius = 0.3
@@ -24,3 +27,24 @@ shape = SubResource("CapsuleShape3D_cat")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
 mesh = SubResource("CapsuleMesh_cat")
 material_override = SubResource("MatCat")
+
+[node name="Bell" type="AudioStreamPlayer3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+stream = ExtResource("2_bell")
+autoplay = true
+bus = &"SFX"
+unit_size = 1.5
+max_distance = 15.0
+
+[node name="SpottedSound" type="AudioStreamPlayer3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+stream = ExtResource("3_meow")
+bus = &"SFX"
+
+[node name="CaughtSound" type="AudioStreamPlayer3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+stream = ExtResource("4_caught")
+bus = &"SFX"
+
+[connection signal="spotted" from="." to="SpottedSound" method="play"]
+[connection signal="caught" from="." to="CaughtSound" method="play"]
