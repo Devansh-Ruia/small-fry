@@ -1,10 +1,14 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="PackedScene" path="res://player/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" path="res://enemy/cat.tscn" id="2_cat"]
+[ext_resource type="Script" path="res://rooms/exit_area.gd" id="3_exit"]
 
 [sub_resource type="BoxShape3D" id="SqueezeBox"]
 size = Vector3(0.6, 0.4, 0.4)
+
+[sub_resource type="BoxShape3D" id="ExitBox"]
+size = Vector3(1.5, 0.6, 1.5)
 
 [sub_resource type="ProceduralSkyMaterial" id="SkyMat"]
 
@@ -119,5 +123,13 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.3, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="SqueezeArea"]
 shape = SubResource("SqueezeBox")
+
+[node name="ExitArea" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 11.5)
+script = ExtResource("3_exit")
+next_scene = "res://ui/win_screen.tscn"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ExitArea"]
+shape = SubResource("ExitBox")
 
 [connection signal="body_entered" from="SqueezeArea" to="Player" method="_on_squeeze_entered"]

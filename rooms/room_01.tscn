@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://buypdocnny7p" path="res://rooms/3dAssets/machine-fortified.glb" id="5_dhk51"]
 [ext_resource type="PackedScene" uid="uid://btna1bndx28n3" path="res://rooms/3dAssets/conveyor.glb" id="6_r1ded"]
 [ext_resource type="PackedScene" uid="uid://cs1ajn88an1u7" path="res://rooms/3dAssets/conveyor-bars-fence.glb" id="7_6peq8"]
+[ext_resource type="Script" path="res://rooms/exit_area.gd" id="8_exit"]
 
 [sub_resource type="ProceduralSkyMaterial" id="SkyMat"]
 
@@ -82,6 +83,9 @@ albedo_color = Color(0.2, 0.7, 0.3, 1)
 
 [sub_resource type="BoxShape3D" id="SqueezeBox"]
 size = Vector3(1.7, 0.4, 0.6)
+
+[sub_resource type="BoxShape3D" id="ExitBox"]
+size = Vector3(1.5, 0.6, 1.5)
 
 [sub_resource type="Curve3D" id="CatPathCurve"]
 _data = {
@@ -358,5 +362,13 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.03, 0.2, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="SqueezeArea"]
 shape = SubResource("SqueezeBox")
+
+[node name="ExitArea" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 5.5)
+script = ExtResource("8_exit")
+next_scene = "res://rooms/room_02.tscn"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ExitArea"]
+shape = SubResource("ExitBox")
 
 [connection signal="body_entered" from="SqueezeArea" to="Player" method="_on_squeeze_entered"]
