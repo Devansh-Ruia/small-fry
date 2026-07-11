@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="PackedScene" path="res://player/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" path="res://enemy/cat.tscn" id="2_cat"]
@@ -19,6 +19,12 @@ sky_material = SubResource("SkyMat")
 background_mode = 2
 sky = SubResource("Sky")
 ambient_light_source = 3
+
+[sub_resource type="StandardMaterial3D" id="MatFloor"]
+albedo_color = Color(0.82, 0.86, 0.95, 1)
+
+[sub_resource type="StandardMaterial3D" id="MatWall"]
+albedo_color = Color(0.6509804, 0.7254902, 0.81960785, 1)
 
 [sub_resource type="StandardMaterial3D" id="MatGreen"]
 albedo_color = Color(0.2, 0.7, 0.3, 1)
@@ -46,51 +52,73 @@ shadow_enabled = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
 use_collision = true
 size = Vector3(8, 0.5, 26)
+material = SubResource("MatFloor")
 
 [node name="WallSouth" type="CSGBox3D" parent="." groups=["occluder"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -13)
 use_collision = true
 size = Vector3(8, 4, 0.5)
+material = SubResource("MatWall")
 
 [node name="WallNorth" type="CSGBox3D" parent="." groups=["occluder"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 13)
 use_collision = true
 size = Vector3(8, 4, 0.5)
+material = SubResource("MatWall")
 
 [node name="WallWest" type="CSGBox3D" parent="." groups=["occluder"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2, 0)
 use_collision = true
 size = Vector3(0.5, 4, 26)
+material = SubResource("MatWall")
 
 [node name="WallEastSouth" type="CSGBox3D" parent="." groups=["occluder"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 2, -6.6)
 use_collision = true
 size = Vector3(0.5, 4, 12.8)
+material = SubResource("MatWall")
 
 [node name="WallEastMid" type="CSGBox3D" parent="." groups=["occluder"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 2, 4.6)
 use_collision = true
 size = Vector3(0.5, 4, 8.8)
+material = SubResource("MatWall")
 
 [node name="PocketFloor" type="CSGBox3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, -0.25, 6)
 use_collision = true
 size = Vector3(2, 0.5, 14)
+material = SubResource("MatFloor")
 
 [node name="PocketWallEast" type="CSGBox3D" parent="." groups=["occluder"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 2, 6)
 use_collision = true
 size = Vector3(0.5, 4, 14)
+material = SubResource("MatWall")
+
+[node name="PocketWallSouth" type="CSGBox3D" parent="." groups=["occluder"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 2, -1)
+use_collision = true
+size = Vector3(2, 4, 0.5)
+material = SubResource("MatWall")
+
+[node name="PocketWallNorth" type="CSGBox3D" parent="." groups=["occluder"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 2, 13)
+use_collision = true
+size = Vector3(2, 4, 0.5)
+material = SubResource("MatWall")
 
 [node name="FurnitureA" type="CSGBox3D" parent="." groups=["occluder"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 1.5, -3)
 use_collision = true
 size = Vector3(3, 3, 3)
+material = SubResource("MatWall")
 
 [node name="FurnitureB" type="CSGBox3D" parent="." groups=["occluder"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 2, 6)
 use_collision = true
 size = Vector3(3, 4, 3)
+material = SubResource("MatWall")
 
 [node name="StartPad" type="CSGBox3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, -11)
