@@ -46,8 +46,6 @@ extends CharacterBody3D
 const ANCHOR_HEIGHT: float = 0.15
 ## Gap kept between the camera and a wall it collides with.
 const COLLISION_MARGIN: float = 0.1
-## Safety cap on the occluder ray loop.
-const MAX_OCCLUDER_STEPS: int = 8
 
 @onready var _mesh: Node3D = $Mesh
 @onready var _camera: Camera3D = $Camera3D
@@ -171,23 +169,16 @@ func _update_camera(delta: float) -> void:
 	_place_camera()
 
 func _update_occluder_fade(delta: float) -> void:
-	# Walk the ray from the camera to the player, collecting every occluder mesh
-	# in between so more than one can fade at once.
+	# Fade any occluder-group mesh whose bounding box crosses the camera→player
+	# line. This is a geometric test, not a physics ray, so collision-less props
+	# fade too without the player or the camera ray ever interacting with them.
 	var occluding: Dictionary = {}
-	var space := get_world_3d().direct_space_state
 	var from: Vector3 = _camera.global_position
 	var to: Vector3 = _camera_anchor()
-	var exclude: Array[RID] = [get_rid()]
-	for _i in MAX_OCCLUDER_STEPS:
-		var query := PhysicsRayQueryParameters3D.create(from, to)
-		query.exclude = exclude
-		var hit: Dictionary = space.intersect_ray(query)
-		if hit.is_empty():
-			break
-		var node = hit.get("collider")
-		if node is Node and node.is_in_group("occluder"):
-			occluding[node] = true
-		exclude.append(hit.get("rid"))
+	for node in get_tree().get_nodes_in_group("occluder"):
+		for mesh in _fade_targets(node):
+			if _segment_hits_aabb(mesh, from, to):
+				occluding[mesh] = true
 
 	# Start tracking any newly-occluding mesh, then move every tracked mesh
 	# toward its target alpha (occluders already tracked fade back to opaque).
@@ -214,3 +205,41 @@ func _make_fade(node: GeometryInstance3D) -> Dictionary:
 	mat.albedo_color = Color(1.0, 1.0, 1.0, 1.0)
 	node.material_override = mat
 	return {"material": mat, "alpha": 1.0}
+
+func _fade_targets(node: Node) -> Array:
+	# The meshes to fade for an occluder-group node: the node itself if it renders
+	# (CSG walls and furniture), otherwise the mesh instances under a prop scene
+	# (glb props whose group tag sits on a plain Node3D root).
+	if node is VisualInstance3D:
+		return [node]
+	return node.find_children("*", "MeshInstance3D", true, false)
+
+func _segment_hits_aabb(vis: VisualInstance3D, from: Vector3, to: Vector3) -> bool:
+	# Slab test of the camera→player segment against the mesh's local AABB, done in
+	# local space so it handles the props' rotations and scales.
+	var inv: Transform3D = vis.global_transform.affine_inverse()
+	var a: Vector3 = inv * from
+	var b: Vector3 = inv * to
+	var box: AABB = vis.get_aabb()
+	var d: Vector3 = b - a
+	var lo: Vector3 = box.position
+	var hi: Vector3 = box.position + box.size
+	var tmin: float = 0.0
+	var tmax: float = 1.0
+	for axis in 3:
+		if absf(d[axis]) < 1e-8:
+			# Segment parallel to this slab: reject if it starts outside it.
+			if a[axis] < lo[axis] or a[axis] > hi[axis]:
+				return false
+		else:
+			var t1: float = (lo[axis] - a[axis]) / d[axis]
+			var t2: float = (hi[axis] - a[axis]) / d[axis]
+			if t1 > t2:
+				var tmp: float = t1
+				t1 = t2
+				t2 = tmp
+			tmin = maxf(tmin, t1)
+			tmax = minf(tmax, t2)
+			if tmin > tmax:
+				return false
+	return true
