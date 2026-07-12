@@ -1,8 +1,15 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=21 format=3]
 
 [ext_resource type="PackedScene" path="res://player/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" path="res://enemy/cat.tscn" id="2_cat"]
 [ext_resource type="Script" path="res://rooms/exit_area.gd" id="3_exit"]
+[ext_resource type="PackedScene" uid="uid://cew8g4cqqifi" path="res://rooms/3dAssets/freezers-standing.glb" id="4_freezers"]
+[ext_resource type="PackedScene" uid="uid://clp6xkxbuddds" path="res://rooms/3dAssets/pipe-large-long.glb" id="5_pipe"]
+[ext_resource type="PackedScene" uid="uid://buypdocnny7p" path="res://rooms/3dAssets/machine-fortified.glb" id="6_machine"]
+[ext_resource type="PackedScene" uid="uid://btna1bndx28n3" path="res://rooms/3dAssets/conveyor.glb" id="7_conveyor"]
+[ext_resource type="PackedScene" uid="uid://cs1ajn88an1u7" path="res://rooms/3dAssets/conveyor-bars-fence.glb" id="8_fence"]
+[ext_resource type="PackedScene" uid="uid://c20m4pvvf7wtw" path="res://rooms/3dAssets/machine-bed.glb" id="9_bed"]
+[ext_resource type="PackedScene" uid="uid://b7fhya4sedry6" path="res://rooms/3dAssets/scanner-high.glb" id="10_scanner"]
 
 [sub_resource type="BoxShape3D" id="SqueezeBox"]
 size = Vector3(0.6, 0.4, 0.4)
@@ -159,5 +166,41 @@ next_scene = "res://ui/win_screen.tscn"
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="ExitArea"]
 shape = SubResource("ExitBox")
+
+[node name="PropFreezerW1" parent="." instance=ExtResource("4_freezers") groups=["occluder"]]
+transform = Transform3D(9.5979125e-08, 0, -1.8257449, 0, 2.3616118, 0, 2.1957464, 0, 7.9805844e-08, -3.3, 0, -10)
+
+[node name="PropPipeW1" parent="." instance=ExtResource("5_pipe") groups=["occluder"]]
+transform = Transform3D(5.246275e-08, 0, 1.0150806, 0, 1.1275644, 0, -1.2002078, 0, 4.437058e-08, -3.3, 2.3334715, -6.5)
+
+[node name="PropConveyorW1" parent="." instance=ExtResource("7_conveyor") groups=["occluder"]]
+transform = Transform3D(4.371139e-08, 0, -1, 0, 1, 0, 1, 0, 4.371139e-08, -3.3, 0.9642234, 1)
+
+[node name="PropMachineW1" parent="." instance=ExtResource("6_machine") groups=["occluder"]]
+transform = Transform3D(4.371139e-08, 0, -1, 0, 1, 0, 1, 0, 4.371139e-08, -3.3, 1.1990472, 3.5)
+
+[node name="PropScannerW1" parent="." instance=ExtResource("10_scanner") groups=["occluder"]]
+transform = Transform3D(4.371139e-08, 0, -1, 0, 1, 0, 1, 0, 4.371139e-08, -3.3, 1.0, 10)
+
+[node name="PropFreezerE1" parent="." instance=ExtResource("4_freezers") groups=["occluder"]]
+transform = Transform3D(-9.5979125e-08, 0, 1.8257449, 0, 2.3616118, 0, -2.1957464, 0, -7.9805844e-08, 3.3, 0, -10)
+
+[node name="PropBedE1" parent="." instance=ExtResource("9_bed") groups=["occluder"]]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 3.3, 0.5, -6.5)
+
+[node name="PropConveyorE1" parent="." instance=ExtResource("7_conveyor") groups=["occluder"]]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 3.3, 0.9642234, -4)
+
+[node name="PropFenceGapS" parent="." instance=ExtResource("8_fence") groups=["occluder"]]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 3.3, 0.86652005, -1.5)
+
+[node name="PropFenceGapN" parent="." instance=ExtResource("8_fence") groups=["occluder"]]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 3.3, 0.86652005, 1.5)
+
+[node name="PropPipeE1" parent="." instance=ExtResource("5_pipe") groups=["occluder"]]
+transform = Transform3D(-5.246275e-08, 0, -1.0150806, 0, 1.1275644, 0, 1.2002078, 0, -4.437058e-08, 3.3, 2.3334715, 5)
+
+[node name="PropMachineE1" parent="." instance=ExtResource("6_machine") groups=["occluder"]]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 3.3, 1.1990472, 8)
 
 [connection signal="body_entered" from="SqueezeArea" to="Player" method="_on_squeeze_entered"]
